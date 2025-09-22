@@ -1,0 +1,166 @@
+/* === 全域 === */
+body{
+  font-family:"Microsoft JhengHei",sans-serif;
+  background:#f9fafb;                 /* gray-50 */
+  color:#374151;                       /* gray-700 */
+  line-height:1.6;
+}
+.page{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:.75rem;
+  padding:1rem;
+}
+
+/* === Tabs 大頁籤（Lulu / Sherry） === */
+#controls > .flex{ border-bottom:1px solid #dbeafe; padding-bottom:.25rem; }
+.tab-btn{
+  flex:1;
+  padding:.85rem 1.2rem;
+  font-size:1.1rem; font-weight:700;
+  text-align:center;
+  border-radius:.9rem .9rem 0 0;
+  border:1px solid #d1d5db;
+  background:#f3f4f6;                 /* gray-100 */
+  color:#334155;                       /* slate-700 */
+  transition:all .2s ease;
+}
+.tab-btn:hover{ background:#e5e7eb; }
+.tab-btn.active{
+  background:#e0f2fe;                 /* sky-100 */
+  color:#0c4a6e;                       /* sky-900 */
+  border-color:#bae6fd;                /* sky-200 */
+  border-bottom-color:#e0f2fe;
+}
+
+/* === 課次清單 === */
+.lesson-box{
+  border:1px solid #e5e7eb;
+  border-radius:.75rem;
+  margin-bottom:1rem;
+  background:#fff; overflow:hidden;
+}
+.lesson-bar{
+  display:flex; align-items:center; gap:.5rem;
+  padding:.5rem .75rem;
+  background:#f9fafb;                  /* gray-50 */
+  border-bottom:1px solid #e5e7eb;
+  font-weight:600;
+}
+.toggle-btn{ color:#2563eb; cursor:pointer; }
+
+/* 課次單字卡：手機2欄 / >=640px 4欄 */
+.word-list{
+  padding:.75rem;
+  display:grid; gap:.75rem;
+  grid-template-columns:repeat(2,1fr);
+}
+@media (min-width:640px){
+  .word-list{ grid-template-columns:repeat(4,1fr); }
+}
+.word-card{
+  position:relative;
+  background:#f8fafc;                  /* very light gray */
+  border:1px solid #e5e7eb;
+  border-radius:.5rem;
+  padding:.6rem .4rem;
+  text-align:center;
+  line-height:1.4;
+}
+.word-en{ font-weight:700; color:#b91c1c; margin-bottom:.25rem; } /* red-700 微暗紅 */
+.word-pos{ font-size:.85rem; color:#6b7280; }                      /* gray-500 */
+.word-zh{  font-size:.9rem;  color:#374151; }                      /* gray-700 */
+.dup-star{ position:absolute; right:8px; top:6px; color:#ef4444; font-size:.8rem; }
+
+/* === 出題設定區（保留漂亮格子） === */
+.controls-grid{
+  display:grid; gap:.75rem;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+}
+.ctrl{ display:flex; flex-direction:column; }
+.ctrl-input{
+  width:100%;
+  border:1px solid #d1d5db; border-radius:.5rem;
+  padding:.4rem .6rem; font-size:1rem; background:#fff;
+}
+.btn-primary{
+  background:#0ea5e9; color:#fff;
+  padding:.5rem 1rem; border-radius:.5rem;
+  font-weight:600; border:none; cursor:pointer;
+}
+.btn-primary:hover{ background:#0284c7; }
+.btn-ghost{
+  padding:.5rem 1rem; border-radius:.5rem;
+  border:1px solid #d1d5db; background:#f9fafb; cursor:pointer;
+}
+.btn-ghost:hover{ background:#f3f4f6; }
+
+/* === 單字填空練習：Word Bank（膠囊 chip 樣式） === */
+.word-bank{
+  margin:1rem 0 1.2rem;
+  display:flex; flex-wrap:wrap; gap:.5rem;
+}
+.bank-chip{
+  display:inline-block;
+  padding:.35rem .8rem;
+  font-size:.95rem; font-weight:600;
+  border:1px solid #cbd5e1;            /* gray-300 */
+  border-radius:9999px;                 /* 膠囊 */
+  background:#fff; color:#1e293b;       /* slate-800 */
+  cursor:pointer; transition:all .2s ease;
+}
+.bank-chip:hover{
+  background:#f0f9ff;                   /* sky-50 */
+  border-color:#38bdf8;                 /* sky-400 */
+  color:#0369a1;                        /* sky-700 */
+}
+
+/* 已用過的 chip（反黑＋刪除線） */
+.bank-chip.used{
+  background:#cbd5e1;
+  color:#fff;
+  text-decoration: line-through;
+}
+
+/* === 題目輸入框（批改顯色） === */
+#questionList input.answer{
+  border:2px solid #d1d5db; border-radius:6px;
+  padding:4px 6px; font-size:1rem; min-width:120px;
+  transition:border-color .25s, background-color .25s;
+}
+#questionList input.answer.correct{ border-color:#22c55e; background:#ecfdf5; } /* green */
+#questionList input.answer.wrong{   border-color:#ef4444; background:#fef2f2; } /* red */
+
+/* === 題下解答（黃底 + 左側正誤色條） === */
+.inline-ans{
+  margin-top:8px;
+  background:#fffbeb;                   /* amber-50 */
+  border-left:4px solid #f59e0b;        /* amber-500 */
+  border-radius:6px;
+  padding:8px 10px;
+  font-size:.95rem; line-height:1.6;
+}
+.inline-ans.correct{ border-left-color:#10b981; } /* 綠條 */
+.inline-ans.wrong{   border-left-color:#ef4444; } /* 紅條 */
+.exp-line{ margin:2px 0; }
+.exp-examples{ display:flex; align-items:baseline; gap:.35rem; }
+.exp-label{ white-space:nowrap; color:#92400e; font-weight:700; }
+.example-list{ margin:0; padding-left:1.1rem; list-style:disc; line-height:inherit; }
+.example-list li{ margin:.1rem 0; }
+
+/* 詞性線索區塊 */
+.pos-hint{
+  background:#eef2ff; /* indigo-50 */
+  border-left:4px solid #6366f1; /* indigo-500 */
+  padding:4px 8px;
+  border-radius:4px;
+  margin-top:6px;
+  color:#3730a3; /* indigo-800 */
+  font-size:.95rem;
+}
+
+/* === 列印 === */
+@media print{
+  #controls,.word-bank{ display:none!important; }
+  .page{ break-after:page; }
+}
