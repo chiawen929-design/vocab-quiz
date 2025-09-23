@@ -113,3 +113,6 @@ body{
   #controls,.word-bank,.btn-primary,.btn-ghost,.toggle-btn,.header-actions{ display:none!important; }
   .page{ break-after:page; }
 }
+@media (max-width: 575.98px) {
+  #headerMeta { display: none !important; }
+}
