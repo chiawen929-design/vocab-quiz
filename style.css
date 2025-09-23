@@ -12,7 +12,7 @@ body{
 
 /* Tabs */
 #controls > .flex{ border-bottom:1px solid #dbeafe; padding-bottom:.25rem; }
-.tab-btn{ flex:1; padding:.85rem 1.2rem; font-size:1.1rem; font-weight:700; text-align:center; border-radius:.9rem .9rem 0 0; border:1px solid #d1d5db; background:#f3f4f6; color:#334155; }
+.tab-btn{ flex:1; padding:.85rem 1.2rem; font-size:1.1rem; font-weight:700; text-align:center; border-radius:.9rem .9rem 0 0; border:1px solid #d1d5db; background:#f3f4f6; color:#334155; transition:all .15s ease; }
 .tab-btn.active{ background:#e0f2fe; color:#0c4a6e; border-color:#bae6fd; border-bottom-color:#e0f2fe; }
 
 /* 課次清單 */
@@ -57,8 +57,11 @@ body{
 .exp-examples{ display:flex; align-items:baseline; gap:.35rem; }
 .exp-label{ white-space:nowrap; color:#92400e; font-weight:700; }
 
-/* header meta */
+/* header meta：手機隱藏（平板/桌機顯示） */
 #headerMeta{ color:#475569; font-variant-numeric:tabular-nums; }
+@media (max-width: 639.98px){
+  #headerMeta { display:none !important; }
+}
 
 /* 右上角齒輪選單 */
 .header-actions{ position:relative; }
@@ -71,7 +74,8 @@ body{
 .menu-badge{ margin-top:.25rem; font-size:.75rem; color:#475569; padding:.2rem .35rem; }
 
 /* ===== 爸媽專區（灰白極簡） ===== */
-#parentModal .pm-shell{max-width:780px; margin:16px auto 24px; padding:0 16px;}
+/* 讓爸媽專區內容寬度 = 彈窗寬度 */
+#parentModal .pm-shell{ width: 100%;max-width: 100%;margin: 16px 0 24px;  /* 移除 auto 置中，改左右貼齊彈窗 */padding: 0 16px;      /* 保留左右 16px 內距，視覺不會貼到邊 */}
 #parentModal .pm-title{font-size:22px; font-weight:800; margin:8px 0 4px;}
 #parentModal .pm-subtitle{color:#6b7280; font-size:13px; margin:0 0 12px;}
 #parentModal .pm-card{background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; box-shadow:0 6px 14px rgba(0,0,0,.06); padding:18px; margin-bottom:16px;}
@@ -108,11 +112,31 @@ body{
 #parentModal .word.editing{outline:2px dashed #d1d5db;}
 #parentModal .word.editing [contenteditable="true"]{background:#ffffff; box-shadow:inset 0 0 0 2px #eef2f7; border-radius:8px; padding:4px;}
 
+/* 讓爸媽專區內容「只保留一層」可下拉（關鍵） */
+#parentPanel{
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+#parentPanel .pm-shell{
+  flex: 1 1 auto;          /* 撐滿剩餘高度 */
+  min-height: 0;           /* 允許收縮才會觸發 overflow */
+  overflow: auto;          /* 超出才捲 */
+  -webkit-overflow-scrolling: touch; /* iOS 慣性滑動 */
+  padding-bottom: 16px;
+}
+/* 手機時，彈窗改全螢幕，避免工具列擠壓 */
+@media (max-width: 640px){
+  #parentPanel{
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+}
+
 /* 列印 */
 @media print{
   #controls,.word-bank,.btn-primary,.btn-ghost,.toggle-btn,.header-actions{ display:none!important; }
   .page{ break-after:page; }
-}
-@media (max-width: 575.98px) {
-  #headerMeta { display: none !important; }
 }

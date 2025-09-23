@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>單字填空考卷產生器</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 若手機樣式不更新，可在這行後面加 ?v=xxx 破快取 -->
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
 </head>
@@ -31,16 +32,19 @@
 
     <!-- 控制區 -->
     <section id="controls" class="space-y-6 mb-6 print:hidden">
+      <!-- 孩子切換 -->
       <div class="flex gap-2">
         <button id="tab-lulu" class="tab-btn active" type="button">Lulu</button>
         <button id="tab-sherry" class="tab-btn" type="button">Sherry</button>
       </div>
 
+      <!-- 課次清單 -->
       <div>
         <h2 class="font-semibold mb-2">① 選擇課次（可複選，點課次可展開單字）</h2>
         <div id="lessonList" class="space-y-2"></div>
       </div>
 
+      <!-- 出題 -->
       <div>
         <h2 class="font-semibold mb-2">② 出題（固定 10 題／10 個單字）</h2>
         <div class="controls-grid">
@@ -56,6 +60,7 @@
         <div class="mb-4">
           <div class="flex items-end justify-between gap-4">
             <h2 class="text-xl font-bold">單字填空練習</h2>
+            <!-- 手機會隱藏；平板/桌機顯示（見 style.css 媒體查詢） -->
             <div class="text-sm text-slate-600 print:text-black">
               <span id="headerMeta" class="whitespace-nowrap"></span>
             </div>
@@ -86,15 +91,16 @@
 
   <!-- 爸媽專區 Modal -->
   <div id="parentModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-xl shadow-xl w-[min(980px,92vw)] max-h[90vh] max-h-[90vh] overflow-hidden">
+    <!-- 重點：flex flex-col + max-h-[90vh] + overflow-hidden，讓內層可拿到剩餘高度 -->
+    <div id="parentPanel" class="bg-white rounded-xl shadow-xl w-[min(980px,92vw)] max-h-[90vh] overflow-hidden flex flex-col">
       <div class="flex items-center justify-between px-4 py-3 border-b">
         <h3 class="font-bold">爸媽專區</h3>
         <button id="closeParentBtn" class="text-slate-500 hover:text-slate-700" type="button">✕</button>
       </div>
 
       <div class="pm-shell">
-        <h1 class="pm-title">爸媽專區</h1>
-        <p class="pm-subtitle">灰白極簡｜專注在內容與可讀性。</p>
+        <h1 class="pm-title">題庫擴增</h1>
+        <p class="pm-subtitle">可隨時新增單字與例句。</p>
 
         <!-- 區塊一：小朋友 / 課次 -->
         <section class="pm-card">
