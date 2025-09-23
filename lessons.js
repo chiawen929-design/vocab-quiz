@@ -1,7 +1,7 @@
 // —— 孩子設定（頁籤）——
 const PROFILES = {
-  lulu:   { title: "Lulu（小一 6歲）",  group: "g1", defaultLevel: "easy", defaultNumQ: 10 },
-  sherry: { title: "Sherry（小四 9歲）", group: "g4", defaultLevel: "hard", defaultNumQ: 10 }
+  lulu:   { title: "Lulu（小一 6歲）",  group: "g1" },
+  sherry: { title: "Sherry（小四 9歲）", group: "g4" }
 };
 
 // 固定重複單字（每課都有）
@@ -23,7 +23,7 @@ const LESSONS = {
   }
 };
 
-// —— 單字中文主要翻譯（展開清單用）——
+// —— 單字中文主要翻譯 —— 
 const SIMPLE_TRANSLATE = {
   enormous: "巨大的",
   interfered: "干擾；干涉",
@@ -44,7 +44,7 @@ const SIMPLE_TRANSLATE = {
   run: "跑步", big: "大", happy: "開心"
 };
 
-// —— 詞性（展開清單第2行）——
+// —— 詞性 —— 
 const POS = {
   enormous: "adj.",
   interfered: "v. (past)",
@@ -65,108 +65,111 @@ const POS = {
   run: "v.", big: "adj.", happy: "adj."
 };
 
-// —— 句庫（升級版，三種難度）——
+// —— 題庫 —— 
 const BANK = {
-  // g4 第一課
-  enormous: {
-    easy:{en:'The elephant was so ______that it blocked the entire road.', zh:'那頭大象非常<b>巨大</b>，把整條路都擋住了。'},
-    medium:{en:'She received an ______ amount of homework before the holiday.', zh:'她在假期前收到了<b>大量的</b>作業。'},
-    hard:{en:'Winning the prize gave him ______ confidence to keep going.', zh:'獲得獎項給了他<b>巨大的</b>信心繼續前進。'}
-  },
-  interfered: {
-    easy:{en:'The loud music ______ with my ability to concentrate on studying.', zh:'吵雜的音樂<b>干擾</b>了我專心讀書。'},
-    medium:{en:'He shouldn’t have ______ in their private conversation.', zh:'他不該<b>干涉</b>他們的私人談話。'},
-    hard:{en:'The storm ______ with the airplane’s flight schedule.', zh:'暴風雨<b>干擾</b>了飛機的航班安排。'}
-  },
-  stationary: {
-    easy:{en:'The bus remained ______ at the stop because of the traffic jam.', zh:'公車因為塞車而<b>停</b>在站牌不動。'},
-    medium:{en:'Please keep the camera ______ while taking the photo.', zh:'拍照時請保持相機<b>靜止</b>。'},
-    hard:{en:'Although the machine looked ______, it was actually running quietly inside.', zh:'雖然機器看起來<b>靜止</b>，其實裡面正在悄悄運轉。'}
-  },
-  abandon: {
-    easy:{en:'The soldiers had to ______ the burning building quickly.', zh:'士兵們必須迅速<b>撤離</b>燃燒的建築物。'},
-    medium:{en:'He decided to ______ his old car on the highway.', zh:'他決定把舊車<b>丟棄</b>在高速公路上。'},
-    hard:{en:'We should never ______ our dreams, no matter how hard it gets.', zh:'無論多困難，我們都不應該<b>放棄</b>夢想。'}
-  },
-  appeared: {
-    easy:{en:'A rainbow suddenly ______ in the sky after the rain.', zh:'雨後天空突然<b>出現</b>了一道彩虹。'},
-    medium:{en:'She ______ on stage wearing a beautiful red dress.', zh:'她身穿漂亮的紅裙子<b>出現</b>在舞台上。'},
-    hard:{en:'The missing child ______ safe and sound at the police station.', zh:'失蹤的孩子在警察局安然<b>出現</b>。'}
-  },
-
-  // g4 第二課
-  figured: {
-    easy:{en:'After hours of searching, she finally ______ out how to unlock the secret door.', zh:'她花了好幾個小時搜尋，終於弄清楚如何打開那扇秘密的門。'},
-    medium:{en:'I never ______ he would surprise me with a birthday cake at midnight.', zh:'我從沒想到他會在半夜給我一個生日蛋糕驚喜。'},
-    hard:{en:'He ______ that the train would be late, so he left home earlier.', zh:'他猜測火車會晚點，所以提早出門。'}
-  },
-  complain: {
-    easy:{en:'The students began to ______ about the heavy homework load.', zh:'學生們開始抱怨功課太多。'},
-    medium:{en:'She always ______ when the coffee is not hot enough.', zh:'她總是抱怨咖啡不夠熱。'},
-    hard:{en:'Instead of ______, he tried to find a way to solve the problem.', zh:'他沒有抱怨，而是嘗試找到解決問題的方法。'}
-  },
-  patience: {
-    easy:{en:'Teachers need a lot of ______ when working with young children.', zh:'老師在教小孩時需要很多耐心。'},
-    medium:{en:'Please have ______, the doctor will see you soon.', zh:'請耐心等待，醫生很快就會見你了。'},
-    hard:{en:'Raising twins requires not only love but also endless ______.', zh:'養雙胞胎不只需要愛，還需要無盡的耐心。'}
-  },
-  temper: {
-    easy:{en:'He lost his ______ when he found out someone broke his phone.', zh:'當他發現有人弄壞他的手機時，他發了脾氣。'},
-    medium:{en:'Keeping your ______ under pressure is not easy.', zh:'在壓力下保持冷靜並不容易。'},
-    hard:{en:'Her quick ______ often causes arguments with friends.', zh:'她急躁的脾氣經常引起與朋友的爭吵。'}
-  },
-  remember: {
-    easy:{en:'Please ______ to lock the door before you leave the house.', zh:'出門前請記得鎖門。'},
-    medium:{en:'Do you ______ the first time we met at the library?', zh:'你還記得我們第一次在圖書館見面嗎？'},
-    hard:{en:'He couldn’t ______ the answer during the test, even though he studied it last night.', zh:'雖然昨晚讀過，他考試時卻想不起答案。'}
-  },
-
-  // 重複字
-   encourage: {
-    easy:{en:'Parents should ______ their children to try new things.', zh:'父母應該鼓勵孩子嘗試新事物。'},
-    medium:{en:'She sent me a message to ______ me before the big presentation.', zh:'在重要簡報前，她傳訊息來鼓勵我。'},
-    hard:{en:'Good teachers ______ students to ask questions in class.', zh:'好的老師會鼓勵學生在課堂上提問。'}
-  },
-  defeat: {
-    easy:{en:'The team worked hard to ______ their strongest rival.', zh:'這支隊伍努力打敗他們最強的對手。'},
-    medium:{en:'He finally managed to ______ his fear of swimming.', zh:'他終於克服了對游泳的恐懼。'},
-    hard:{en:'The general promised to ______ the enemy before winter.', zh:'將軍承諾要在冬天前擊敗敵人。'}
-  },
-  distinguish: {
-    easy:{en:'Can you ______ red wine from grape juice just by looking?', zh:'你能僅憑外觀分辨紅酒和葡萄汁嗎？'},
-    medium:{en:'It’s hard to ______ fact from opinion on social media.', zh:'在社群媒體上很難分辨事實與意見。'},
-    hard:{en:'Babies can quickly ______ their mother’s voice from others.', zh:'嬰兒能很快辨認出媽媽的聲音。'}
-  },
-  achieve: {
-    easy:{en:'She worked day and night to ______ her dream of becoming a doctor.', zh:'她日以繼夜努力，實現了當醫生的夢想。'},
-    medium:{en:'The company managed to ______ record sales this year.', zh:'公司今年成功創下銷售紀錄。'},
-    hard:{en:'To ______ success, you need both talent and persistence.', zh:'要取得成功，你需要天賦和堅持。'}
-  },
-  command: {
-    easy:{en:'The officer gave a ______ to his soldiers to move forward.', zh:'軍官下令士兵前進。'},
-    medium:{en:'She spoke with such ______ that everyone followed her instructions.', zh:'她說話帶著權威，因此大家都聽從她的指示。'},
-    hard:{en:'The general’s ______ was clear: protect the city at all costs.', zh:'將軍的命令很明確：不惜一切代價保護城市。'}
-  },
-
-  // g1 Lulu（示範）
-  cat:   { easy:{en:'The ______ is on the bed.', zh:'<b>貓</b>在床上。'},
-           medium:{en:'I see a black ______.', zh:'我看到一隻黑色的<b>貓</b>。'},
-           hard:{en:'The small ______ likes milk.', zh:'小<b>貓</b>喜歡牛奶。'} },
-  dog:   { easy:{en:'The ______ runs fast.', zh:'<b>狗</b>跑得很快。'},
-           medium:{en:'My ______ is friendly.', zh:'我的<b>狗</b>很友善。'},
-           hard:{en:'The brown ______ likes to play.', zh:'棕色的<b>狗</b>喜歡玩。'} },
-  run:   { easy:{en:'I can ______ to school.', zh:'我可以<b>跑步</b>去學校。'},
-           medium:{en:'We ______ in the park.', zh:'我們在公園<b>跑步</b>。'},
-           hard:{en:'They ______ every morning.', zh:'他們每天早上<b>跑步</b>。'} },
-  big:   { easy:{en:'This is a ______ cake.', zh:'這是一個<b>大的</b>蛋糕。'},
-           medium:{en:'The box is too ______.', zh:'這箱子太<b>大</b>了。'},
-           hard:{en:'We saw a ______ house.', zh:'我們看到一棟<b>很大</b>的房子。'} },
-  happy: { easy:{en:'I feel ______ today.', zh:'我今天很<b>開心</b>。'},
-           medium:{en:'She looks ______ in class.', zh:'她在課堂上看起來很<b>開心</b>。'},
-           hard:{en:'We were ______ at the party.', zh:'我們在派對很<b>開心</b>。'} }
+  enormous: [
+    {en:'The dog is ______.', zh:'那隻狗很<b>巨大</b>。'},
+    {en:'The ______ tree gave shade to the whole playground.', zh:'這棵<b>巨大的</b>樹讓整個操場都有樹蔭。'},
+    {en:'The storm caused ______ damage to the small town.', zh:'這場風暴造成小鎮<b>巨大的</b>破壞。'}
+  ],
+  interfered: [
+    {en:'The noise ______ with my sleep.', zh:'噪音<b>干擾</b>了我的睡眠。'},
+    {en:'He ______ in the game and made the players angry.', zh:'他<b>介入</b>比賽，惹怒了選手們。'},
+    {en:'The loud construction ______ with our online class, so the teacher rescheduled.', zh:'吵雜的施工<b>干擾</b>了我們的線上課，所以老師只好改期。'}
+  ],
+  stationary: [
+    {en:'The car is ______ at the red light.', zh:'那輛車在紅燈時保持<b>靜止</b>。'},
+    {en:'The bike stayed ______ even though the wind was strong.', zh:'雖然風很大，腳踏車仍然<b>靜止</b>不動。'},
+    {en:'The soldiers remained ______ until they received the command to move.', zh:'士兵們一直保持<b>靜止</b>，直到收到移動的命令。'}
+  ],
+  abandon: [
+    {en:'Do not ______ your pet.', zh:'不要<b>拋棄</b>你的寵物。'},
+    {en:'The team had to ______ the game because of heavy rain.', zh:'因為大雨，球隊不得不<b>放棄</b>比賽。'},
+    {en:'She felt sad when her best friend decided to ______ their plan without explanation.', zh:'當最好的朋友毫無解釋地<b>放棄</b>他們的計畫時，她感到很難過。'}
+  ],
+  appeared: [
+    {en:'The moon ______ in the sky.', zh:'月亮<b>出現</b>在天空中。'},
+    {en:'A rainbow suddenly ______ after the rain stopped.', zh:'雨停後突然<b>出現</b>一道彩虹。'},
+    {en:'He ______ calm, but inside he was very nervous about the test.', zh:'他<b>看起來</b>很冷靜，但內心對考試其實很緊張。'}
+  ],
+  figured: [
+    {en:'I ______ the answer was 10.', zh:'我<b>認為</b>答案是10。'},
+    {en:'She ______ out how to fix the broken toy.', zh:'她<b>想出</b>如何修好壞掉的玩具。'},
+    {en:'He ______ it was better to stay quiet than to argue with his teacher.', zh:'他<b>認為</b>保持沉默比和老師爭論更好。'}
+  ],
+  complain: [
+    {en:'He likes to ______ about homework.', zh:'他喜歡<b>抱怨</b>作業。'},
+    {en:'The children ______ that the food was too cold.', zh:'孩子們<b>抱怨</b>食物太冷了。'},
+    {en:'Instead of ______, we should think of ways to solve the problem.', zh:'與其<b>抱怨</b>，不如想辦法解決問題。'}
+  ],
+  patience: [
+    {en:'Mom has ______ with the baby.', zh:'媽媽對嬰兒很有<b>耐心</b>。'},
+    {en:'You need ______ when you learn a new skill.', zh:'學習新技能需要<b>耐心</b>。'},
+    {en:'His ______ finally ran out after waiting for the bus for an hour.', zh:'等公車一小時後，他的<b>耐心</b>終於用盡了。'}
+  ],
+  temper: [
+    {en:'He has a bad ______.', zh:'他<b>脾氣</b>不好。'},
+    {en:'She lost her ______ when her brother broke her toy.', zh:'弟弟弄壞她的玩具時，她發了<b>脾氣</b>。'},
+    {en:'It takes practice to control one’s ______ during stressful times.', zh:'在壓力大的時候，控制<b>脾氣</b>需要練習。'}
+  ],
+  remember: [
+    {en:'I ______ my teacher’s name.', zh:'我<b>記得</b>老師的名字。'},
+    {en:'Please ______ to bring your homework tomorrow.', zh:'請<b>記得</b>明天帶作業。'},
+    {en:'He couldn’t ______ where he had placed his keys after the party.', zh:'派對結束後，他<b>記不起</b>把鑰匙放在哪裡。'}
+  ],
+  encourage: [
+    {en:'Teachers ______ students to read.', zh:'老師<b>鼓勵</b>學生閱讀。'},
+    {en:'My coach always ______ me before a big game.', zh:'大比賽前，教練總是<b>鼓勵</b>我。'},
+    {en:'Parents should ______ children to try new things even if they might fail.', zh:'父母應該<b>鼓勵</b>孩子嘗試新事物，即使可能會失敗。'}
+  ],
+  defeat: [
+    {en:'Our team will ______ theirs.', zh:'我們隊會<b>打敗</b>他們。'},
+    {en:'The hero finally ______ the dragon.', zh:'英雄終於<b>打敗</b>了惡龍。'},
+    {en:'They worked together to ______ their fear of speaking in public.', zh:'他們齊心協力<b>戰勝</b>上台說話的恐懼。'}
+  ],
+  distinguish: [
+    {en:'Can you ______ red from pink?', zh:'你能<b>分辨</b>紅色和粉紅色嗎？'},
+    {en:'It’s hard to ______ twins because they look alike.', zh:'雙胞胎長得很像，很難<b>分辨</b>。'},
+    {en:'Good readers can ______ between facts and opinions in a story.', zh:'好的讀者能<b>分辨</b>故事中的事實與意見。'}
+  ],
+  achieve: [
+    {en:'She wants to ______ her goal.', zh:'她想<b>達成</b>目標。'},
+    {en:'He ______ high grades by studying hard.', zh:'他努力學習，<b>取得</b>好成績。'},
+    {en:'The team felt proud to ______ success after months of hard work.', zh:'經過數月努力後，團隊對<b>達成</b>成功感到自豪。'}
+  ],
+  command: [
+    {en:'The captain gave a ______ to stop.', zh:'隊長下了停止的<b>命令</b>。'},
+    {en:'The dog obeyed the ______ to sit quietly.', zh:'那隻狗服從了坐下的<b>命令</b>。'},
+    {en:'All soldiers followed the general’s ______ without question.', zh:'所有士兵都毫無疑問地服從將軍的<b>命令</b>。'}
+  ],
+  cat: [
+    {en:'The ______ is on the bed.', zh:'<b>貓</b>在床上。'},
+    {en:'I see a black ______.', zh:'我看到一隻黑色的<b>貓</b>。'},
+    {en:'The small ______ likes milk.', zh:'小<b>貓</b>喜歡牛奶。'}
+  ],
+  dog: [
+    {en:'The ______ runs fast.', zh:'<b>狗</b>跑得很快。'},
+    {en:'My ______ is friendly.', zh:'我的<b>狗</b>很友善。'},
+    {en:'The brown ______ likes to play.', zh:'棕色的<b>狗</b>喜歡玩。'}
+  ],
+  run: [
+    {en:'I can ______ to school.', zh:'我可以<b>跑步</b>去學校。'},
+    {en:'We ______ in the park.', zh:'我們在公園<b>跑步</b>。'},
+    {en:'They ______ every morning.', zh:'他們每天早上<b>跑步</b>。'}
+  ],
+  big: [
+    {en:'This is a ______ cake.', zh:'這是一個<b>大的</b>蛋糕。'},
+    {en:'The box is too ______ to carry alone.', zh:'這個箱子<b>太大</b>，一個人拿不動。'},
+    {en:'We saw a ______ house at the end of the street.', zh:'我們在街尾看到一棟<b>很大</b>的房子。'}
+  ],
+  happy: [
+    {en:'I feel ______ today.', zh:'我今天很<b>開心</b>。'},
+    {en:'She looks ______ in class.', zh:'她在課堂上看起來很<b>開心</b>。'},
+    {en:'We were ______ at the party.', zh:'我們在派對很<b>開心</b>。'}
+  ]
 };
 
-// —— 確保全域可讀 ——（避免未使用 module 時讀不到）
+// —— 確保全域可讀 —— 
 window.PROFILES = PROFILES;
 window.DUP = DUP;
 window.LESSONS = LESSONS;

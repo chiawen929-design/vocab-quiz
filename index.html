@@ -4,49 +4,61 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>單字填空考卷產生器</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- Tailwind 僅作為小工具（可留可移除） -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
 </head>
 <body class="bg-slate-50 text-slate-800">
   <div class="max-w-6xl mx-auto p-4 sm:p-6">
-
-    <!-- ===== 標題 ===== -->
-    <header class="mb-6">
+    <!-- 標題列 + 右上角齒輪 -->
+    <header class="mb-6 print:mb-3 flex items-center justify-between">
       <h1 class="text-2xl sm:text-3xl font-bold">📘 單字填空考卷產生器</h1>
+      <div class="header-actions print:hidden">
+        <button id="parentGear" class="gear-btn" title="爸媽工具（長按開啟）" aria-label="爸媽工具（長按開啟）">⚙️</button>
+        <div class="menu">
+          <button id="openParentBtn" class="menu-item" type="button">👨‍👩‍👧‍👦 爸媽專區</button>
+          <button id="exportDatasetBtn" class="menu-item" type="button">⬇️ 匯出題庫（JSON）</button>
+          <button id="exportAsJsBtn" class="menu-item" type="button">📄 匯出為 lessons.js 片段</button>
+          <label class="menu-item cursor-pointer">
+            ⬆️ 匯入題庫（JSON）
+            <input id="importDatasetInput" type="file" accept="application/json" class="hidden" />
+          </label>
+          <button id="resetDatasetBtn" class="menu-item" type="button">使用預設題庫</button>
+          <div id="datasetBadge" class="menu-badge">使用預設題庫</div>
+        </div>
+      </div>
     </header>
 
-    <!-- ===== 控制區 ===== -->
-    <section id="controls" class="space-y-6 mb-6">
-
-      <!-- 孩子切換（頁籤） -->
+    <!-- 控制區 -->
+    <section id="controls" class="space-y-6 mb-6 print:hidden">
       <div class="flex gap-2">
-        <button id="tab-lulu" class="tab-btn active">Lulu</button>
-        <button id="tab-sherry" class="tab-btn">Sherry</button>
+        <button id="tab-lulu" class="tab-btn active" type="button">Lulu</button>
+        <button id="tab-sherry" class="tab-btn" type="button">Sherry</button>
       </div>
 
-      <!-- 課次清單 -->
       <div>
         <h2 class="font-semibold mb-2">① 選擇課次（可複選，點課次可展開單字）</h2>
-        <div id="lessonList"></div>
+        <div id="lessonList" class="space-y-2"></div>
       </div>
 
-      <!-- 出題 -->
       <div>
         <h2 class="font-semibold mb-2">② 出題（固定 10 題／10 個單字）</h2>
         <div class="controls-grid">
-          <button id="generateBtn" class="btn-primary">🚀 產生題目</button>
-          <button id="printBtn" class="btn-ghost hide-mobile hide-tablet">🖨️ 列印 / 存 PDF</button>
+          <button id="generateBtn" class="btn-primary" type="button">🚀 產生題目</button>
+          <button id="printBtn" class="btn-ghost hide-mobile hide-tablet" type="button">🖨️ 列印 / 存 PDF</button>
         </div>
       </div>
     </section>
 
-    <!-- ===== 出題結果 ===== -->
+    <!-- 出題結果 -->
     <section id="output" class="space-y-6">
       <div id="worksheet" class="page">
         <div class="mb-4">
           <div class="flex items-end justify-between gap-4">
             <h2 class="text-xl font-bold">單字填空練習</h2>
+            <div class="text-sm text-slate-600 print:text-black">
+              <span id="headerMeta" class="whitespace-nowrap"></span>
+            </div>
           </div>
           <p id="scoreBox" class="text-sm text-slate-700 mt-2"></p>
         </div>
@@ -57,16 +69,10 @@
         <!-- 題目列表 -->
         <ol id="questionList" class="space-y-3 list-decimal pl-6"></ol>
 
-        <!-- 卷末唯一按鈕 -->
-        <div class="mt-6 flex flex-wrap gap-2 justify-end">
-          <button id="gradeBtnSheet"
-            class="px-4 py-2 rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100">
-            ✅ 批改
-          </button>
-          <button id="inlineAnsBtn"
-            class="px-4 py-2 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100">
-            💡 解答
-          </button>
+        <!-- 卷末按鈕 -->
+        <div class="mt-6 flex flex-wrap gap-2 justify-end print:hidden">
+          <button id="gradeBtnSheet" class="px-4 py-2 rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100" type="button">✅ 批改</button>
+          <button id="inlineAnsBtn" class="px-4 py-2 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100" type="button">💡 提示</button>
         </div>
       </div>
 
@@ -78,7 +84,52 @@
     </section>
   </div>
 
-  <!-- 載入順序：先 lessons 再 main -->
+  <!-- 爸媽專區 Modal -->
+  <div id="parentModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl w-[min(980px,92vw)] max-h[90vh] max-h-[90vh] overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b">
+        <h3 class="font-bold">爸媽專區</h3>
+        <button id="closeParentBtn" class="text-slate-500 hover:text-slate-700" type="button">✕</button>
+      </div>
+
+      <div class="pm-shell">
+        <h1 class="pm-title">爸媽專區</h1>
+        <p class="pm-subtitle">灰白極簡｜專注在內容與可讀性。</p>
+
+        <!-- 區塊一：小朋友 / 課次 -->
+        <section class="pm-card">
+          <div class="pm-controls">
+            <div class="pm-row">
+              <div class="pm-label">小朋友</div>
+              <select id="kid"><option>Sherry</option><option>Lulu</option></select>
+            </div>
+            <div class="pm-row">
+              <div class="pm-label">已有課次</div>
+              <select id="lesson-list"><option value="">選擇課次</option></select>
+            </div>
+            <div class="pm-row" style="grid-column:1/-1;">
+              <input type="text" id="lesson-new" placeholder="新增課次名稱" />
+              <button class="pm-btn" id="btnAddLesson" type="button">＋ 新增課次</button>
+              <button class="pm-btn pm-danger" id="btnDeleteLesson" type="button" title="刪除目前選取的課次">🗑️ 刪除課次</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 區塊二：單字清單 -->
+        <section class="pm-card" id="word-card">
+          <div class="pm-card-head">
+            <div class="pm-card-title">現有單字與例句</div>
+            <button class="pm-linkbtn" id="btnAddWord" type="button">＋ 新增單字卡</button>
+          </div>
+          <div id="word-list">
+            <p id="empty-tip" class="pm-muted">目前沒有單字，請點右上角「＋ 新增單字卡」。</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- 資料 + 主程式 -->
   <script src="lessons.js"></script>
   <script src="main.js"></script>
 </body>
