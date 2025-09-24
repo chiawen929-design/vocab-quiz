@@ -9,6 +9,8 @@ let CURRENT = { profileKey: 'lulu', qa: [], words: [] };
 let INLINE_MODE = 0;
 let currentInput = null;
 let USED_MAP = {};
+const ORDER_KEY = 'vocab_lesson_order_v1'; // 課次排序（每個 group 一份）
+let LESSON_ORDER = {}; // { g1:[ids...], g4:[ids...] }
 
 /***** ========= 題庫覆蓋（爸媽專區：JSON 存取） ========= *****/
 const DATA_KEY = 'vocab_dataset_v1';
@@ -38,28 +40,38 @@ function exportDataset(){
   a.download = `vocab-dataset_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
-/* 新增：匯出為 lessons.js 片段（可直接貼） */
+/* 2) 匯出為 lessons.js（完全相同格式，可直接覆蓋） */
 function exportDatasetAsLessonsJS(){
   const code =
-`// ===== paste below into lessons.js =====
+`// —— 孩子設定（頁籤）——
 const PROFILES = ${JSON.stringify(PROFILES, null, 2)};
+
+// 固定重複單字（每課都有）
 const DUP = ${JSON.stringify(DUP, null, 2)};
+
+// —— 課次清單 ——（group 控制顯示給哪位孩子）
 const LESSONS = ${JSON.stringify(LESSONS, null, 2)};
+
+// —— 單字中文主要翻譯 —— 
 const SIMPLE_TRANSLATE = ${JSON.stringify(SIMPLE_TRANSLATE, null, 2)};
+
+// —— 詞性 —— 
 const POS = ${JSON.stringify(POS, null, 2)};
+
+// —— 題庫 —— 
 const BANK = ${JSON.stringify(BANK, null, 2)};
 
+// —— 確保全域可讀 —— 
 window.PROFILES = PROFILES;
 window.DUP = DUP;
 window.LESSONS = LESSONS;
 window.SIMPLE_TRANSLATE = SIMPLE_TRANSLATE;
 window.POS = POS;
 window.BANK = BANK;
-// ===== end =====
 `;
   const blob = new Blob([code], {type:'text/plain'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'lessons-snippet.js';
+  const a = document.createElement('a'); a.href = url; a.download = 'lessons.js';
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 function importDatasetFromFile(file){
@@ -106,6 +118,22 @@ function tryRestoreDraft() {
   } catch {}
 }
 
+/***** ========= 課次排序（儲存/讀取/套用） ========= *****/
+function loadLessonOrder(){
+  try{ LESSON_ORDER = JSON.parse(localStorage.getItem(ORDER_KEY) || '{}'); }catch{ LESSON_ORDER = {}; }
+}
+function saveLessonOrder(){ localStorage.setItem(ORDER_KEY, JSON.stringify(LESSON_ORDER)); }
+function getOrderedLessonEntries(group){
+  const entries = Object.entries(LESSONS).filter(([,o])=>o.group===group);
+  const order = LESSON_ORDER[group] || [];
+  // 依 order 排序；漏掉的 id 貼到最後
+  const map = new Map(entries.map(([id,o])=>[id,o]));
+  const sorted = [];
+  order.forEach(id=>{ if(map.has(id)) { sorted.push([id, map.get(id)]); map.delete(id); }});
+  [...map.entries()].forEach(e=>sorted.push(e));
+  return sorted;
+}
+
 /***** ========= Tabs ========= *****/
 function initTabs() {
   $('#tab-lulu')?.addEventListener('click', () => switchProfile('lulu'));
@@ -119,12 +147,11 @@ function switchProfile(key) {
   renderLessonList(); updateHeaderMeta();
 }
 
-/***** ========= Lessons ========= *****/
+/***** ========= Lessons（首頁） ========= *****/
 function renderLessonList() {
   const group = PROFILES[CURRENT.profileKey].group;
   const box = $('#lessonList');
-  const html = Object.entries(LESSONS)
-    .filter(([, obj]) => obj.group === group)
+  const html = getOrderedLessonEntries(group)
     .map(([id, obj]) => {
       const wordsHtml = (obj.words || []).map(w => {
         const zh = SIMPLE_TRANSLATE[w] || '';
@@ -158,6 +185,9 @@ function renderLessonList() {
   box.addEventListener('change', e => {
     if (e.target && e.target.classList.contains('lessonCk')) { updateHeaderMeta(); saveDraft(); }
   });
+
+  // 同步「課次排序」清單（爸媽專區）
+  renderLessonSortList();
 }
 function buildWordPool() {
   const pool = {};
@@ -167,10 +197,13 @@ function buildWordPool() {
 
 /***** ========= 出題 ========= *****/
 function pickTemplate(entryArr){ return Array.isArray(entryArr) && entryArr.length ? pick(entryArr) : {en:'______', zh:''}; }
-function makeQA(pool, MUST = 10) {
+/* 3) 單課：出該課全部；多課：最多 10 題 */
+function makeQA(pool) {
+  const selected = getSelectedLessons();
   const vocab = Object.keys(pool);
-  if (vocab.length < MUST) { alert('可用單字少於 10 個，請多勾選幾個課次。'); return []; }
-  const chosen = [...vocab].sort(() => Math.random() - 0.5).slice(0, MUST);
+  if (vocab.length === 0) { alert('請先勾選課次'); return []; }
+  const maxCount = (selected.length <= 1) ? vocab.length : Math.min(10, vocab.length);
+  const chosen = [...vocab].sort(() => Math.random() - 0.5).slice(0, maxCount);
   return chosen.map(w => [w, pickTemplate(pool[w])]);
 }
 
@@ -345,7 +378,7 @@ function generate(){
     if (!ok) return;
   }
   const pool = buildWordPool(); if(!Object.keys(pool).length){ alert('請先勾選課次'); return; }
-  CURRENT.qa = makeQA(pool, 10); if (CURRENT.qa.length === 0) return;
+  CURRENT.qa = makeQA(pool); if (CURRENT.qa.length === 0) return;
   renderQA();
   window.scrollTo({top:$('#output').offsetTop,behavior:'smooth'});
 }
@@ -432,6 +465,37 @@ function saveDatasetToLocal(){
   showToast('已儲存'); updateDatasetBadge();
 }
 
+/* 1) 內容可編輯欄位：自動清空/自動還原 placeholder */
+const PM_PLACEHOLDERS = {
+  main: '（新單字）',
+  pos: '(詞性)',
+  meaning: '（中文解釋）',
+  en: '（輸入英文例句即可，系統會自動把關鍵單字挖空）',
+  zh: '（輸入中文翻譯；會嘗試自動加粗主要譯語）'
+};
+function attachEditablePlaceholders(root){
+  root.querySelectorAll('[contenteditable="true"]').forEach(el=>{
+    el.addEventListener('focus', ()=>{
+      const t = el.textContent.trim();
+      // 若是 placeholder，一點就清空
+      if (Object.values(PM_PLACEHOLDERS).includes(t)) { el.textContent=''; }
+      // 將游標移到末端
+      const range = document.createRange(); range.selectNodeContents(el); range.collapse(false);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    });
+    el.addEventListener('blur', ()=>{
+      const t = el.textContent.trim();
+      if (!t) {
+        if (el.classList.contains('main')) el.textContent = PM_PLACEHOLDERS.main;
+        else if (el.classList.contains('pos')) el.textContent = PM_PLACEHOLDERS.pos;
+        else if (el.classList.contains('meaning')) el.textContent = PM_PLACEHOLDERS.meaning;
+        else if (el.classList.contains('en')) el.textContent = PM_PLACEHOLDERS.en;
+        else if (el.classList.contains('zh')) el.textContent = PM_PLACEHOLDERS.zh;
+      }
+    });
+  });
+}
+
 /* 編輯流程 */
 function pmToggleWordHeader(header){
   const wordEl = header.closest('.word');
@@ -453,6 +517,7 @@ function pmEnterEdit(btn){
   word.querySelector('.btn-save').style.display='inline-block';
   word.querySelector('.btn-cancel').style.display='inline-block';
   word.querySelector('.btn-addpair').style.display='inline-block';
+  attachEditablePlaceholders(word);
 }
 function pmSaveEdit(btn){
   const card = btn.closest('.word');
@@ -462,12 +527,12 @@ function pmSaveEdit(btn){
   const w = card.querySelector('.main').textContent.trim();
   const pos = card.querySelector('.pos').textContent.trim();
   const zh  = card.querySelector('.meaning').textContent.trim();
-  if (!w){ alert('單字不能空白'); return; }
+  if (!w || w === PM_PLACEHOLDERS.main){ alert('單字不能空白'); return; }
 
   const rawPairs = [...card.querySelectorAll('.pair')].map(p=>({
     en:(p.querySelector('.en')?.textContent||'').trim(),
     zh:(p.querySelector('.zh')?.textContent||'').trim()
-  })).filter(p=>p.en||p.zh);
+  })).filter(p=> (p.en && p.en!==PM_PLACEHOLDERS.en) || (p.zh && p.zh!==PM_PLACEHOLDERS.zh));
 
   const pairs = rawPairs.map(p=>{
     const enFix = autoBlankEN(w, p.en);
@@ -475,8 +540,8 @@ function pmSaveEdit(btn){
     return { en: enFix.en, zh: zhFix };
   });
 
-  SIMPLE_TRANSLATE[w] = zh;
-  POS[w] = pos;
+  if (zh && zh !== PM_PLACEHOLDERS.meaning) SIMPLE_TRANSLATE[w] = zh;
+  if (pos && pos !== PM_PLACEHOLDERS.pos) POS[w] = pos;
   if (pairs.length) BANK[w] = pairs; else BANK[w] = BANK[w] || [];
 
   const arr = LESSONS[lid].words || (LESSONS[lid].words = []);
@@ -494,8 +559,9 @@ function pmAddPair(btn){
   const pairs = word.querySelector('.pairs');
   const block = document.createElement('div');
   block.className='pair';
-  block.innerHTML = '<div class="en" contenteditable="true">（輸入英文例句即可，系統會自動把關鍵單字挖空）</div><div class="zh" contenteditable="true">（輸入中文翻譯；會嘗試自動加粗主要譯語）</div>';
+  block.innerHTML = `<div class="en" contenteditable="true">${PM_PLACEHOLDERS.en}</div><div class="zh" contenteditable="true">${PM_PLACEHOLDERS.zh}</div>`;
   pairs.appendChild(block);
+  attachEditablePlaceholders(word);
 }
 function pmAddWord(){
   const lid = $('#lesson-list').value;
@@ -503,34 +569,41 @@ function pmAddWord(){
   const list = $('#word-list');
   const div = document.createElement('div');
   div.className='word editing open';
+  div.setAttribute('draggable','true');
   div.innerHTML = `
     <div class="word-header">
-      <span class="main" contenteditable="true">（新單字）</span>
-      <span class="pos" contenteditable="true">(詞性)</span>
-      <span class="meaning" contenteditable="true">（中文解釋）</span>
+      <span class="drag-handle">⠿</span>
+      <span class="main" contenteditable="true">${PM_PLACEHOLDERS.main}</span>
+      <span class="pos" contenteditable="true">${PM_PLACEHOLDERS.pos}</span>
+      <span class="meaning" contenteditable="true">${PM_PLACEHOLDERS.meaning}</span>
       <div class="actions">
         <button class="btn btn-edit" style="display:none" data-action="edit">編輯</button>
         <button class="btn btn-save" data-action="save">完成</button>
         <button class="btn btn-cancel" data-action="cancel">取消</button>
         <button class="btn btn-addpair" data-action="addpair">＋新增例句</button>
+        <button class="btn btn-move" data-action="move">移到其他課次</button>
       </div>
     </div>
     <div class="pairs">
       <div class="pair">
-        <div class="en" contenteditable="true">（輸入英文例句即可，系統會自動把關鍵單字挖空）</div>
-        <div class="zh" contenteditable="true">（輸入中文翻譯；會嘗試自動加粗主要譯語）</div>
+        <div class="en" contenteditable="true">${PM_PLACEHOLDERS.en}</div>
+        <div class="zh" contenteditable="true">${PM_PLACEHOLDERS.zh}</div>
       </div>
     </div>`;
   list.prepend(div);
+  attachEditablePlaceholders(div);
   $('#empty-tip')?.remove();
 }
-/* 新增：刪除課次 */
+/* 刪除課次（只刪關聯不刪字典） */
 function pmDeleteLesson(){
   const lid = $('#lesson-list').value;
   if (!lid){ alert('請先選擇要刪除的課次'); return; }
   const title = LESSONS[lid]?.title || lid;
   if (!confirm(`確定要刪除課次「${title}」嗎？\n此動作會移除此課次與其單字關聯，但不會刪除單字本身的翻譯、詞性與例句。`)) return;
   delete LESSONS[lid];
+  // 也從排序中移除
+  const kid = $('#kid').value.toLowerCase(); const group = (kid==='lulu')?'g1':'g4';
+  LESSON_ORDER[group] = (LESSON_ORDER[group]||[]).filter(id=>id!==lid); saveLessonOrder();
   saveDatasetToLocal();
   pmOnKidChange();
 }
@@ -541,20 +614,26 @@ function pmAddLesson(){
   const group = (kid==='lulu')?'g1':'g4';
   const id = `${group}-${Date.now().toString().slice(-6)}`;
   LESSONS[id] = { title: name, group, words: [] };
+  // 新增即加入排序尾端
+  LESSON_ORDER[group] = (LESSON_ORDER[group]||[]);
+  LESSON_ORDER[group].push(id); saveLessonOrder();
+
   saveDatasetToLocal();
   const select = $('#lesson-list');
   const opt = document.createElement('option'); opt.textContent=name; opt.value=id;
   select.appendChild(opt); select.value=id;
   $('#lesson-new').value='';
   pmRenderWords();
+  renderLessonSortList();
 }
 function pmOnKidChange(){
   const kid = $('#kid').value.toLowerCase();
   const group = (kid==='lulu')?'g1':'g4';
   const select = $('#lesson-list');
-  const entries = Object.entries(LESSONS).filter(([,o])=>o.group===group);
+  const entries = getOrderedLessonEntries(group);
   select.innerHTML = '<option value="">選擇課次</option>' + entries.map(([id,o])=>`<option value="${id}">${o.title}</option>`).join('');
   $('#word-list').innerHTML = '<p id="empty-tip" class="pm-muted">請先選擇課次，或新增一個課次。</p>';
+  renderLessonSortList();
 }
 function pmRenderWords(){
   const lid = $('#lesson-list').value;
@@ -578,8 +657,11 @@ function pmRenderWords(){
       </div>`).join('');
     const card = document.createElement('div');
     card.className = 'word';
+    card.setAttribute('draggable','true');
+    card.dataset.word = w;
     card.innerHTML = `
       <div class="word-header">
+        <span class="drag-handle">⠿</span>
         <span class="main">${w}</span>
         <span class="pos">${pos}</span>
         <span class="meaning">${zh}</span>
@@ -588,12 +670,16 @@ function pmRenderWords(){
           <button class="btn btn-save" style="display:none" data-action="save">完成</button>
           <button class="btn btn-cancel" style="display:none" data-action="cancel">取消</button>
           <button class="btn btn-addpair" style="display:none" data-action="addpair">＋新增例句</button>
+          <button class="btn btn-move" data-action="move">移到其他課次</button>
           <button class="btn btn-del" data-action="remove">移出課次</button>
         </div>
       </div>
       <div class="pairs">${pairsHTML}</div>`;
     list.appendChild(card);
   });
+
+  // 啟用拖曳排序（單字）
+  enableWordDragSort();
 }
 function pmRemoveFromLesson(btn){
   const card = btn.closest('.word');
@@ -603,6 +689,44 @@ function pmRemoveFromLesson(btn){
   LESSONS[lid].words = (LESSONS[lid].words||[]).filter(x=>x!==w);
   saveDatasetToLocal(); pmRenderWords();
 }
+
+/* 4) 移到其他課次（彈出迷你對話框選擇目標） */
+let __moveCtx = null;
+function pmMoveWord(btn){
+  const card = btn.closest('.word');
+  const w = card.querySelector('.main').textContent.trim();
+  const curLid = $('#lesson-list').value;
+  const kid = $('#kid').value.toLowerCase();
+  const group = (kid==='lulu')?'g1':'g4';
+  const options = getOrderedLessonEntries(group);
+
+  const dlg = $('#moveDialog');
+  const sel = $('#moveTarget');
+  sel.innerHTML = options.map(([id,o])=>`<option value="${id}" ${id===curLid?'disabled':''}>${o.title}</option>`).join('');
+  __moveCtx = { word:w, from:curLid };
+  dlg.classList.remove('hidden');
+}
+$('#moveOk')?.addEventListener('click', ()=>{
+  const dlg = $('#moveDialog');
+  const sel = $('#moveTarget');
+  if (!__moveCtx) return (dlg.classList.add('hidden'));
+  const to = sel.value;
+  const { word, from } = __moveCtx;
+
+  if (to && to !== from){
+    // 從 from 移除，加到 to 尾端（若尚未存在）
+    LESSONS[from].words = (LESSONS[from].words||[]).filter(x=>x!==word);
+    LESSONS[to].words = (LESSONS[to].words||[]);
+    if (!LESSONS[to].words.includes(word)) LESSONS[to].words.push(word);
+    saveDatasetToLocal();
+    pmRenderWords();
+  }
+  __moveCtx = null;
+  dlg.classList.add('hidden');
+});
+$('#moveCancel')?.addEventListener('click', ()=>{
+  __moveCtx = null; $('#moveDialog').classList.add('hidden');
+});
 
 /***** ========= 事件委派（爸媽專區所有按鈕） ========= */
 (function bindParentActions(){
@@ -621,6 +745,7 @@ function pmRemoveFromLesson(btn){
     if (action === 'edit') return pmEnterEdit(btn);
     if (action === 'addpair') return pmAddPair(btn);
     if (action === 'remove') return pmRemoveFromLesson(btn);
+    if (action === 'move') return pmMoveWord(btn);
   });
 })();
 
@@ -631,9 +756,90 @@ $('#btnAddWord')?.addEventListener('click', pmAddWord);
 $('#kid')?.addEventListener('change', pmOnKidChange);
 $('#lesson-list')?.addEventListener('change', pmRenderWords);
 
+/***** ========= 拖曳排序：單字於課內 ========= *****/
+function enableWordDragSort(){
+  const container = $('#word-list'); if (!container) return;
+  let dragEl = null;
+
+  container.querySelectorAll('.word').forEach(el=>{
+    el.addEventListener('dragstart', (e)=>{ dragEl = el; el.classList.add('dragging'); });
+    el.addEventListener('dragend', ()=>{ if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; }});
+  });
+  container.addEventListener('dragover', (e)=>{
+    e.preventDefault();
+    const after = getDragAfterElement(container, e.clientY);
+    const dragging = container.querySelector('.word.dragging');
+    if (!dragging) return;
+    if (after == null) container.appendChild(dragging);
+    else container.insertBefore(dragging, after);
+  });
+  container.addEventListener('drop', ()=>{
+    // 依目前 DOM 順序回寫 LESSONS[lid].words
+    const lid = $('#lesson-list').value;
+    const words = [...container.querySelectorAll('.word')].map(el=>el.querySelector('.main').textContent.trim());
+    LESSONS[lid].words = words;
+    saveDatasetToLocal();
+  });
+
+  function getDragAfterElement(container, y){
+    const els = [...container.querySelectorAll('.word:not(.dragging)')];
+    return els.reduce((closest, child)=>{
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height/2;
+      if (offset < 0 && offset > closest.offset){ return { offset, element: child }; }
+      else { return closest; }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+}
+
+/***** ========= 課次排序（拖曳） ========= *****/
+function renderLessonSortList(){
+  const kid = ($('#kid')?.value || (CURRENT.profileKey==='lulu'?'Lulu':'Sherry')).toLowerCase();
+  const group = (kid==='lulu')?'g1':'g4';
+  const ul = $('#lesson-sort'); if (!ul) return;
+  const entries = getOrderedLessonEntries(group);
+  ul.innerHTML = entries.map(([id,o])=>`
+    <li class="sortable-item" draggable="true" data-id="${id}">
+      <span class="drag-handle">⠿</span>
+      <span>${o.title}</span>
+    </li>
+  `).join('');
+
+  let dragging = null;
+  ul.querySelectorAll('.sortable-item').forEach(item=>{
+    item.addEventListener('dragstart', ()=>{ dragging = item; item.classList.add('dragging'); });
+    item.addEventListener('dragend', ()=>{ if(dragging){ dragging.classList.remove('dragging'); dragging=null; } });
+  });
+  ul.addEventListener('dragover', (e)=>{
+    e.preventDefault();
+    const after = getAfter(ul, e.clientY);
+    const draggingEl = ul.querySelector('.sortable-item.dragging');
+    if (!draggingEl) return;
+    if (after == null) ul.appendChild(draggingEl);
+    else ul.insertBefore(draggingEl, after);
+  });
+  ul.addEventListener('drop', ()=>{
+    const ids = [...ul.querySelectorAll('.sortable-item')].map(li=>li.dataset.id);
+    LESSON_ORDER[group] = ids; saveLessonOrder();
+    // 重新渲染首頁課次列表以反映排序
+    if (PROFILES[CURRENT.profileKey].group === group) renderLessonList();
+  });
+
+  function getAfter(container, y){
+    const els = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
+    return els.reduce((closest, child)=>{
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height/2;
+      if (offset < 0 && offset > closest.offset){ return { offset, element: child }; }
+      else { return closest; }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+}
+
 /***** ========= Init ========= *****/
 window.addEventListener('DOMContentLoaded',()=>{
   loadDatasetFromStorage(); updateDatasetBadge();
+  loadLessonOrder();
 
   if (typeof PROFILES==='undefined' || typeof LESSONS==='undefined' || typeof BANK==='undefined') {
     console.error('lessons.js 未載入或結構不符'); return;

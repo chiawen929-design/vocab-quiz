@@ -19,7 +19,7 @@
         <div class="menu">
           <button id="openParentBtn" class="menu-item" type="button">👨‍👩‍👧‍👦 爸媽專區</button>
           <button id="exportDatasetBtn" class="menu-item" type="button">⬇️ 匯出題庫（JSON）</button>
-          <button id="exportAsJsBtn" class="menu-item" type="button">📄 匯出為 lessons.js 片段</button>
+          <button id="exportAsJsBtn" class="menu-item" type="button">📄 匯出為 lessons.js</button>
           <label class="menu-item cursor-pointer">
             ⬆️ 匯入題庫（JSON）
             <input id="importDatasetInput" type="file" accept="application/json" class="hidden" />
@@ -46,7 +46,7 @@
 
       <!-- 出題 -->
       <div>
-        <h2 class="font-semibold mb-2">② 出題（固定 10 題／10 個單字）</h2>
+        <h2 class="font-semibold mb-2">② 出題（最多 10 題；只選單一課則出該課全部）</h2>
         <div class="controls-grid">
           <button id="generateBtn" class="btn-primary" type="button">🚀 產生題目</button>
           <button id="printBtn" class="btn-ghost hide-mobile hide-tablet" type="button">🖨️ 列印 / 存 PDF</button>
@@ -91,7 +91,7 @@
 
   <!-- 爸媽專區 Modal -->
   <div id="parentModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <!-- 重點：flex flex-col + max-h-[90vh] + overflow-hidden，讓內層可拿到剩餘高度 -->
+    <!-- flex flex-col + max-h-[90vh] + overflow-hidden -->
     <div id="parentPanel" class="bg-white rounded-xl shadow-xl w-[min(980px,92vw)] max-h-[90vh] overflow-hidden flex flex-col">
       <div class="flex items-center justify-between px-4 py-3 border-b">
         <h3 class="font-bold">爸媽專區</h3>
@@ -124,13 +124,33 @@
         <!-- 區塊二：單字清單 -->
         <section class="pm-card" id="word-card">
           <div class="pm-card-head">
-            <div class="pm-card-title">現有單字與例句</div>
+            <div class="pm-card-title">現有單字與例句（可拖拉排序）</div>
             <button class="pm-linkbtn" id="btnAddWord" type="button">＋ 新增單字卡</button>
           </div>
           <div id="word-list">
             <p id="empty-tip" class="pm-muted">目前沒有單字，請點右上角「＋ 新增單字卡」。</p>
           </div>
         </section>
+
+        <!-- 區塊三：課次排序（拖曳） -->
+        <section class="pm-card" id="lesson-order-card">
+          <div class="pm-card-head">
+            <div class="pm-card-title">課次排序（拖曳）</div>
+          </div>
+          <ul id="lesson-sort" class="sortable-list"></ul>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移動到其他課次的迷你對話框（JS 生成/控制） -->
+  <div id="moveDialog" class="mini-modal hidden">
+    <div class="mini-modal-body">
+      <div class="mini-modal-title">移到其他課次</div>
+      <select id="moveTarget"></select>
+      <div class="mini-modal-actions">
+        <button id="moveOk" class="btn-primary">確認</button>
+        <button id="moveCancel" class="btn-ghost">取消</button>
       </div>
     </div>
   </div>
